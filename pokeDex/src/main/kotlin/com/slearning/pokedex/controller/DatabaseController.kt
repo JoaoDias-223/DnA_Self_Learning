@@ -53,6 +53,7 @@ class DatabaseController(url: String, user: String, pwd: String, useFile: Boolea
 
             if (!file.exists()){
                 file.createNewFile()
+                file.writeText("{}")
             }
         }
         catch(exception: Exception){
@@ -71,7 +72,6 @@ class DatabaseController(url: String, user: String, pwd: String, useFile: Boolea
 
         if (this.isUsingFile()) {
             val fileStringData = (getConnection() as File?)?.readText() ?: ""
-            println(fileStringData)
             data = Json.decodeFromString(fileStringData)
         }
 

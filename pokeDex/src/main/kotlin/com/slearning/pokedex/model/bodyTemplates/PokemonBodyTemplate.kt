@@ -3,7 +3,7 @@ package com.slearning.pokedex.model.bodyTemplates
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PokemonBody(
+data class PokemonBodyTemplate(
     val name: String,
     val type: Array<Int>,
     val description: String,
@@ -13,7 +13,7 @@ data class PokemonBody(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as PokemonBody
+        other as PokemonBodyTemplate
 
         if (name != other.name) return false
         if (!type.contentEquals(other.type)) return false
