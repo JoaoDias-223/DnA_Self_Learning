@@ -1,11 +1,16 @@
 package com.slearning.pokedex
 
+import com.slearning.pokedex.controller.DatabaseConnectionInfo
+import com.slearning.pokedex.controller.DatabaseController
 import com.slearning.pokedex.controller.PokemonController
 import com.slearning.pokedex.model.bodyTemplates.PokemonBodyTemplate
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.boot.runApplication
+import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.OK
 import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletResponse
 
 @SpringBootApplication (exclude = [DataSourceAutoConfiguration::class])
 @RestController
@@ -16,6 +21,8 @@ class URLController{
 		private const val readPokemon: String = "$listOfPokemon/{pokemonID}"
 		private const val updatePokemon: String = "$listOfPokemon/update"
 		private const val deletePokemon: String = "$listOfPokemon/delete"
+		private val pokemonDatabaseController: DatabaseController = DatabaseController(DatabaseConnectionInfo("./src/main/resources/pokemons.db", "", "", true))
+		private val skillsDatabaseController: DatabaseController = DatabaseController(DatabaseConnectionInfo("./src/main/resources/skills.db", "", "", true))
 	}
 
 	@GetMapping(listOfPokemon)
@@ -24,29 +31,18 @@ class URLController{
 	}
 
 	@PostMapping(createPokemon)
-	fun createPokemon(@RequestBody body: PokemonBodyTemplate) : MutableMap<String, Any> {
-		val response: MutableMap<String, Any> = mutableMapOf()
-		response["header"] = mutableMapOf<String, String>()
-
-
-		val operationReturnCode: Int = PokemonController.createPokemon(body)
-		var statusCode: String = ""
-		var statusLine: String = ""
-		var description: String = ""
-
-		when {
-			operationReturnCode == PokemonController.DUPLICATE_POKEMON_ERROR -> { statusCode = "400"; statusLine = "Bad Request"; description = "Pokemon's already registered" }
-			operationReturnCode == PokemonController.UNREGISTERED_SKILL_ERROR -> { statusCode = "400"; statusLine = "Bad Request"; description = "Pokemon's skill not registered" }
-			operationReturnCode == PokemonController.TYPE_AND_SKILL_MISMATCH -> { statusCode = "400"; statusLine = "Bad Request"; description = "Pokemon's types and skills mismatching'" }
-			operationReturnCode == PokemonController.OK -> { statusCode = "200"; statusLine = "OK"; description = "Everything's fine" }
+	fun createPokemon(@RequestBody body: PokemonBodyTemplate, response: HttpServletResponse) : PokemonBodyTemplate {
+		when (PokemonController.createPokemon(body, pokemonDatabaseController, skillsDatabaseController)) {
+			PokemonController.DUPLICATE_POKEMON_ERROR -> { response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's already registered") }
+			PokemonController.UNREGISTERED_SKILL_ERROR -> { response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's skill not registered") }
+			PokemonController.TYPE_AND_SKILL_MISMATCH -> { response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's types and skills mismatching") }
+			PokemonController.OK -> { response.status = OK.value(); response.addHeader("Description", "Everything's fine") }
 		}
 
-		(response["header"] as MutableMap<String, String>).put("Status-Code", statusCode)
-		(response["header"] as MutableMap<String, String>).put("Status-Line", statusLine)
-		(response["header"] as MutableMap<String, String>).put("Description", description)
-		response["body"] = body
+		response.contentType = "application/json"
+		response.characterEncoding = "UTF-8"
 
-		return response
+		return body
 	}
 
 	@GetMapping(readPokemon)

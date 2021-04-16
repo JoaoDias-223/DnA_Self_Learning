@@ -2,95 +2,92 @@ package com.slearning.pokedex.controller
 
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
+import com.slearning.pokedex.model.Database
 import java.io.File
 
-class DatabaseController(url: String, user: String, pwd: String, useFile: Boolean=false) {
-    private var connection: Any? = null
-
-    private var url: String = ""
-    private var user: String = ""
-    private var pwd: String = ""
-    private var useFile: Boolean = false
+class DatabaseController(private var connectionInfo: DatabaseConnectionInfo) {
+    private var database: Database = Database("{}")
 
     init {
-        this.url = url
-        this.user = user
-        this.pwd = pwd
-        this.useFile = useFile
-
-        if (useFile)
-            this.connection = connect(url=url, user=user, pwd=pwd, file=useFile) as File?
-        else {
-            this.connection = connect(url=url, user=user, pwd=pwd, file=useFile)
-        }
+        connect(connectionInfo)
     }
 
-    private fun connect(url: String, user: String, pwd: String, file: Boolean): Any? {
-        return if (file) {
-            connectToLocalFile(url)
+    fun connect(connectionInfo: DatabaseConnectionInfo): Database {
+        database =  if (connectionInfo.useFile) {
+            connectToLocalFile(connectionInfo.url)
         } else {
-            connectToPostgresDB(url, user, pwd)
+            connectToPostgresDB(connectionInfo.url, connectionInfo.user, connectionInfo.pwd)
         }
+
+        return database
     }
 
-    private fun connectToPostgresDB(url: String, user: String, pwd: String): Any {
-        println("SQL($url) CONNECTION")
+    private fun connectToPostgresDB(url: String, user: String, pwd: String): Database {
+        println("[DatabaseController::connectToPostgresDB()]: SQL($url) CONNECTION")
 
         println("url: $url")
         println("user: $user")
         println("pwd: $pwd")
 
-        return Any()
+        return Database("{}")
     }
 
-    private fun connectToLocalFile(url: String): File? {
-        println("FILE($url) CONNECTION")
+    private fun connectToLocalFile(url: String): Database {
+        println("[DatabaseController::connectToLocalFile()]: FILE($url) CONNECTION")
 
-        var file: File? = null
+        var db: Database = Database("{}")
 
         try{
-            file = File(url)
+            val file = File(url)
 
             if (!file.exists()){
                 file.createNewFile()
                 file.writeText("{}")
             }
+
+            db = Database(file.readText())
         }
         catch(exception: Exception){
             exception.printStackTrace()
         }
 
-        return file
+        return db
     }
 
-    fun retryConnection() {
-        this.connection = connect(url=this.url, user=user, pwd=pwd, file=useFile) as File?
-    }
+    inline fun <reified T: Any> getMutableMapOfDeserializedData(): MutableMap<String, T> = getDatabase().getMutableMapOfDeserializedData()
 
-    inline fun <reified T: Any> getMutableMapOfDeserializedData(): MutableMap<String, T> {
-        var data: MutableMap<String, T> = mutableMapOf()
+    inline fun <reified T:Any> insertNewDeserializedData(newData: T): Database {
+        println("[DatabaseController::insertNewDeserializedData()]: called | '${getConnectionInfo().url}'")
 
-        if (this.isUsingFile()) {
-            val fileStringData = (getConnection() as File?)?.readText() ?: ""
-            data = Json.decodeFromString(fileStringData)
+        getDatabase().insertNewDeserializedData(newData)
+
+        if (getConnectionInfo().useFile) {
+            try{
+                val file = File(getConnectionInfo().url)
+
+                if (!file.exists()){
+                    file.createNewFile()
+                }
+
+                file.writeText(getDatabase().getStringData())
+
+            }
+            catch(exception: Exception){
+                exception.printStackTrace()
+            }
         }
 
-        return data
+        return getDatabase()
     }
 
-    inline fun <reified T:Any> insertNewDeserializedData(newData: T): MutableMap<String, T> {
-        val mutableMapOfDeserializedData = getMutableMapOfDeserializedData<T>()
-        mutableMapOfDeserializedData["${newData.hashCode()}"] = newData
+    fun getDatabase(): Database = database
+    fun setDatabase(newDatabase: Database): Database {this.database = newDatabase; return this.database}
 
-        if (this.isUsingFile()) {
-            (getConnection() as File?)?.writeText(Json.encodeToString(mutableMapOfDeserializedData))
-        }
-
-        return mutableMapOfDeserializedData
+    fun getConnectionInfo(): DatabaseConnectionInfo = connectionInfo
+    fun setConnectionInfo(newConnectionInfo: DatabaseConnectionInfo): DatabaseController {
+        this.connectionInfo = newConnectionInfo
+        return this
     }
 
-
-    fun getConnection(): Any? = connection
-
-    fun isUsingFile(): Boolean = useFile
+    fun isUsingFile(): Boolean = connectionInfo.useFile
 }

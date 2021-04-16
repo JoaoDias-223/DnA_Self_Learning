@@ -11,45 +11,38 @@ class PokemonController {
         const val UNREGISTERED_SKILL_ERROR = 2
         const val TYPE_AND_SKILL_MISMATCH = 3
 
-        @JvmStatic
-        fun createPokemon(newPokemonData: PokemonBodyTemplate): Int {
-            println("New Pokemon Data: $newPokemonData")
+        fun createPokemon(newPokemonData: PokemonBodyTemplate, pokemonDatabaseController: DatabaseController, skillDatabaseController: DatabaseController): Int {
+            println("[PokemonController::createPokemon()]: New Pokemon Data: $newPokemonData")
 
-            val pokemonDB = DatabaseController(url="./src/main/resources/pokemons.db", user="", pwd="", useFile=true)
-            val pokemons = pokemonDB.getMutableMapOfDeserializedData<PokemonBodyTemplate>()
-
-            val skillsDB = DatabaseController(url="./src/main/resources/skills.db", user="", pwd="", useFile=true)
-            val skills = skillsDB.getMutableMapOfDeserializedData<SkillBodyTemplate>()
+            val pokemons = pokemonDatabaseController.getMutableMapOfDeserializedData<PokemonBodyTemplate>()
+            val skills = skillDatabaseController.getMutableMapOfDeserializedData<SkillBodyTemplate>()
 
             return when {
                 isPokemonAlreadyRegistered(newPokemonData, pokemons) -> DUPLICATE_POKEMON_ERROR
                 arePokemonSkillsUnregisteredInDB(newPokemonData, skills) -> UNREGISTERED_SKILL_ERROR
                 arePokemonTypeAndSkillsNotMatching(newPokemonData) -> TYPE_AND_SKILL_MISMATCH
                 else -> {
-                    pokemonDB.insertNewDeserializedData(newPokemonData)
-
+                    println(pokemonDatabaseController.insertNewDeserializedData(newPokemonData).getMutableMapOfDeserializedData<PokemonBodyTemplate>())
                     OK
                 }
             }
-
         }
 
-        private fun isPokemonAlreadyRegistered(pokemon: PokemonBodyTemplate, pokemons: MutableMap<String, PokemonBodyTemplate>): Boolean {
+        fun isPokemonAlreadyRegistered(pokemon: PokemonBodyTemplate, pokemons: MutableMap<String, PokemonBodyTemplate>): Boolean {
             return pokemons.containsKey("${pokemon.hashCode()}")
         }
 
-        private fun arePokemonSkillsUnregisteredInDB(pokemon: PokemonBodyTemplate, skills: MutableMap<String, SkillBodyTemplate>): Boolean {
+        fun arePokemonSkillsUnregisteredInDB(pokemon: PokemonBodyTemplate, skills: MutableMap<String, SkillBodyTemplate>): Boolean {
             var counter = 0
             pokemon.skills.forEach { pokemonSkillID ->
                 skills.forEach { (databaseSkillID, _) ->
                     counter += if("$pokemonSkillID" == databaseSkillID){ 1 } else { 0 }
                 }
             }
-            println("counter: $counter")
             return counter != pokemon.skills.size
         }
 
-        private fun arePokemonTypeAndSkillsNotMatching(pokemon: PokemonBodyTemplate): Boolean {
+        fun arePokemonTypeAndSkillsNotMatching(pokemon: PokemonBodyTemplate): Boolean {
             var counter = 0
             pokemon.type.forEach { type ->
                 pokemon.skills.forEach { skill ->
