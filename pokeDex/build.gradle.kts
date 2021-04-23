@@ -15,6 +15,7 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
 	mavenCentral()
+	jcenter()
 }
 
 extra["springCloudVersion"] = "2020.0.2"
@@ -32,6 +33,8 @@ dependencies {
 	testImplementation("io.mockk:mockk:1.10.6")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.amshove.kluent:kluent:1.50")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.5.0")
 
 }
 
