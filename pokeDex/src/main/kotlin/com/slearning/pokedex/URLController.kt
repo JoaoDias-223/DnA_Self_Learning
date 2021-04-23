@@ -1,9 +1,7 @@
 package com.slearning.pokedex
 
-import com.slearning.pokedex.controller.DatabaseConnectionInfo
-import com.slearning.pokedex.controller.DatabaseController
-import com.slearning.pokedex.controller.PokemonController
-import com.slearning.pokedex.model.bodyTemplates.PokemonBodyTemplate
+import com.slearning.pokedex.controller.PokemonRepository
+import com.slearning.pokedex.model.dtos.PokemonDTO
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.boot.runApplication
@@ -11,51 +9,63 @@ import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.OK
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletResponse
+import com.slearning.pokedex.controller.Serializer
+import com.slearning.pokedex.controller.Serializer.toJson
 
 @SpringBootApplication (exclude = [DataSourceAutoConfiguration::class])
 @RestController
-class URLController{
-	companion object{
-		private const val listOfPokemon: String = "/list_of_pokemon"
-		private const val createPokemon: String = "$listOfPokemon/create"
-		private const val readPokemon: String = "$listOfPokemon/{pokemonID}"
-		private const val updatePokemon: String = "$listOfPokemon/update"
-		private const val deletePokemon: String = "$listOfPokemon/delete"
-		private val pokemonDatabaseController: DatabaseController = DatabaseController(DatabaseConnectionInfo("./src/main/resources/pokemons.db", "", "", true))
-		private val skillsDatabaseController: DatabaseController = DatabaseController(DatabaseConnectionInfo("./src/main/resources/skills.db", "", "", true))
+class URLController (private val pokemonController: PokemonRepository){
+
+	@GetMapping("/list_of_pokemon")
+	fun getAllPokemons(response: HttpServletResponse) : String {
+		response.status = OK.value()
+		response.contentType = "application/json"
+
+		return pokemonController.getPokemons().toJson()
 	}
 
-	@GetMapping(listOfPokemon)
-	fun getAllPokemons() : String {
-		TODO("Not yet implemented")
-	}
+	/* Trocar o header Description por uma mensagem no body*/
+	@PostMapping("/pokemon")
+	fun createPokemon(@RequestBody body: PokemonDTO, response: HttpServletResponse) : PokemonDTO {
+		when (pokemonController.createPokemon(body)) {
 
-	@PostMapping(createPokemon)
-	fun createPokemon(@RequestBody body: PokemonBodyTemplate, response: HttpServletResponse) : PokemonBodyTemplate {
-		when (PokemonController.createPokemon(body, pokemonDatabaseController, skillsDatabaseController)) {
-			PokemonController.DUPLICATE_POKEMON_ERROR -> { response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's already registered") }
-			PokemonController.UNREGISTERED_SKILL_ERROR -> { response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's skill not registered") }
-			PokemonController.TYPE_AND_SKILL_MISMATCH -> { response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's types and skills mismatching") }
-			PokemonController.OK -> { response.status = OK.value(); response.addHeader("Description", "Everything's fine") }
+			PokemonRepository.DUPLICATE_POKEMON_ERROR -> {
+				println("-----------DUPLICATE POKEMON ERROR-----------")
+				response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's already registered")
+			}
+
+			PokemonRepository.UNREGISTERED_SKILL_ERROR -> {
+				println("-----------UNREGISTERED SKILL ERROR-----------")
+				response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's skill not registered")
+			}
+
+			PokemonRepository.TYPE_AND_SKILL_MISMATCH -> {
+				println("-----------TYPE AND SKILL MISMATCH-----------")
+				response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's types and skills mismatching")
+			}
+
+			PokemonRepository.OK -> {
+				println("-----------OK-----------")
+				response.status = OK.value(); response.addHeader("Description", "Everything's fine")
+			}
 		}
 
 		response.contentType = "application/json"
-		response.characterEncoding = "UTF-8"
 
 		return body
 	}
 
-	@GetMapping(readPokemon)
-	fun getPokemon(id: Int) : String {
+	@GetMapping("/list_of_pokemon/{pokemonID}")
+	fun getPokemon(@RequestParam(name = "id", required = true)id: Int) : String {
 		TODO("Not yet implemented")
 	}
 
-	@DeleteMapping(deletePokemon)
+	@DeleteMapping("/list_of_pokemon/{pokemonID}")
 	fun deletePokemon(id: Int) : String {
 		TODO("Not yet implemented")
 	}
 
-	@PutMapping(updatePokemon)
+	@PutMapping("/list_of_pokemon/update")
 	fun updatePokemon(id: Int) : String {
 		TODO("Not yet implemented")
 	}
