@@ -8,8 +8,8 @@ class PokemonDatabase {
     private val data: MutableMap<String, PokemonDTO> = mutableMapOf()
 
     init {
-//        data["-283589297"] = PokemonDTO("Pikachu", listOf(1), "A lightning rat", listOf(1))
-//        data["888455034"] = PokemonDTO("Raichu", listOf(1), "A big lightning rat", listOf(1))
+        data["-283589297"] = PokemonDTO("Pikachu", listOf(1), "A lightning rat", listOf(1))
+        data["888455034"] = PokemonDTO("Raichu", listOf(1), "A big lightning rat", listOf(1))
     }
 
     fun getData() = this.data

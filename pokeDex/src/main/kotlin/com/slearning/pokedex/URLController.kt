@@ -5,11 +5,9 @@ import com.slearning.pokedex.model.dtos.PokemonDTO
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.boot.runApplication
-import org.springframework.http.HttpStatus.BAD_REQUEST
-import org.springframework.http.HttpStatus.OK
+import org.springframework.http.HttpStatus.*
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletResponse
-import com.slearning.pokedex.controller.Serializer
 import com.slearning.pokedex.controller.Serializer.toJson
 
 @SpringBootApplication (exclude = [DataSourceAutoConfiguration::class])
@@ -26,38 +24,45 @@ class URLController (private val pokemonController: PokemonRepository){
 
 	/* Trocar o header Description por uma mensagem no body*/
 	@PostMapping("/pokemon")
-	fun createPokemon(@RequestBody body: PokemonDTO, response: HttpServletResponse) : PokemonDTO {
-		when (pokemonController.createPokemon(body)) {
+	fun createPokemon(@RequestBody body: PokemonDTO, response: HttpServletResponse) : String {
+		response.contentType = "application/json"
 
+		return when (pokemonController.createPokemon(body)) {
 			PokemonRepository.DUPLICATE_POKEMON_ERROR -> {
-				println("-----------DUPLICATE POKEMON ERROR-----------")
-				response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's already registered")
+				response.status = BAD_REQUEST.value()
+				"Pokemon's already registered"
 			}
 
 			PokemonRepository.UNREGISTERED_SKILL_ERROR -> {
-				println("-----------UNREGISTERED SKILL ERROR-----------")
-				response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's skill not registered")
+				response.status = BAD_REQUEST.value()
+				"Pokemon's skill not registered"
 			}
 
 			PokemonRepository.TYPE_AND_SKILL_MISMATCH -> {
-				println("-----------TYPE AND SKILL MISMATCH-----------")
-				response.status = BAD_REQUEST.value(); response.addHeader("Description", "Pokemon's types and skills mismatching")
+				response.status = BAD_REQUEST.value()
+				"Pokemon's types and skills mismatching"
 			}
 
-			PokemonRepository.OK -> {
-				println("-----------OK-----------")
-				response.status = OK.value(); response.addHeader("Description", "Everything's fine")
+			else -> {
+				response.status = OK.value()
+				"Everything's fine"
 			}
 		}
-
-		response.contentType = "application/json"
-
-		return body
 	}
 
 	@GetMapping("/list_of_pokemon/{pokemonID}")
-	fun getPokemon(@RequestParam(name = "id", required = true)id: Int) : String {
-		TODO("Not yet implemented")
+	fun getPokemon(@PathVariable pokemonID: String, response: HttpServletResponse) : String {
+		response.contentType = "application/json"
+		return when(val pokemon =  pokemonController.getPokemonById(pokemonID)) {
+			null -> {
+				response.status = NOT_FOUND.value()
+				"{}"
+			}
+			else -> {
+				response.status = OK.value()
+				pokemon.toString()
+			}
+		}
 	}
 
 	@DeleteMapping("/list_of_pokemon/{pokemonID}")
