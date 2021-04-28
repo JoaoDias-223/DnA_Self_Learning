@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.jvm.tasks.Jar
 
 plugins {
 	id("org.springframework.boot") version "2.4.4"
@@ -22,6 +23,8 @@ extra["springCloudVersion"] = "2020.0.2"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation ("org.springframework.boot:spring-boot-starter-data-jdbc")
+	implementation ("org.springframework.boot:spring-boot-starter-jdbc")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -35,7 +38,6 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.amshove.kluent:kluent:1.50")
 	testImplementation("org.junit.jupiter:junit-jupiter:5.5.0")
-
 }
 
 dependencyManagement {
@@ -53,4 +55,22 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+val fatJar = task("fatJar", type = Jar::class) {
+	archiveBaseName.set("${project.name}-fat")
+	manifest {
+		attributes["Implementation-Title"] = "Gradle Jar File With All Dependencies"
+		attributes["Implementation-Version"] = archiveVersion
+		attributes["Main-Class"] = "com.slearning.pokedex.Main"
+	}
+
+	from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+	with(tasks.jar.get() as CopySpec)
+}
+
+tasks {
+	"build" {
+		dependsOn(fatJar)
+	}
 }

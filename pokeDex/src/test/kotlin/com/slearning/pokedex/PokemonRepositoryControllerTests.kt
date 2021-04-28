@@ -1,6 +1,6 @@
 package com.slearning.pokedex
 
-import com.slearning.pokedex.controller.PokemonRepository
+import com.slearning.pokedex.controller.PokemonRepositoryController
 import com.slearning.pokedex.databases.PokemonDatabase
 import com.slearning.pokedex.databases.SkillDatabase
 import com.slearning.pokedex.model.dtos.PokemonDTO
@@ -11,7 +11,7 @@ import org.amshove.kluent.`should contain same`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class PokemonRepositoryTests {
+class PokemonRepositoryControllerTests {
 
     @BeforeEach
     fun setup() {
@@ -26,11 +26,11 @@ class PokemonRepositoryTests {
         val pokemonData = PokemonDTO(name="Pikachu", type= listOf(1), description="A lightning rat", skills=listOf(1))
 
         // Act
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result = pokemonRepository.createPokemon(pokemonData)
 
         // Assert
-        result `should be equal to` PokemonRepository.OK
+        result `should be equal to` PokemonRepositoryController.OK
         pokemonDB.getData()[pokemonData.hashCode().toString()]?.apply {
             name `should be equal to` pokemonData.name
             type `should contain same` pokemonData.type
@@ -49,11 +49,11 @@ class PokemonRepositoryTests {
         pokemonDB.insertData(pokemonData.hashCode().toString(), pokemonData)
 
         // Act
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result = pokemonRepository.createPokemon(pokemonData)
 
         // Assert
-        result `should be equal to` PokemonRepository.DUPLICATE_POKEMON_ERROR
+        result `should be equal to` PokemonRepositoryController.DUPLICATE_POKEMON_ERROR
     }
 
     @Test
@@ -64,11 +64,11 @@ class PokemonRepositoryTests {
         val pokemonData = PokemonDTO(name="Pikachu", type= listOf(3), description="A lightning rat", skills=listOf(1))
 
         // Act
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result = pokemonRepository.createPokemon(pokemonData)
 
         // Assert
-        result `should be equal to` PokemonRepository.TYPE_AND_SKILL_MISMATCH
+        result `should be equal to` PokemonRepositoryController.TYPE_AND_SKILL_MISMATCH
     }
 
     @Test
@@ -79,11 +79,11 @@ class PokemonRepositoryTests {
         val pokemonData = PokemonDTO(name="Pikachu", type= listOf(1), description="A lightning rat", skills=listOf(2))
 
         // Act
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result = pokemonRepository.createPokemon(pokemonData)
 
         // Assert
-        result `should be equal to` PokemonRepository.UNREGISTERED_SKILL_ERROR
+        result `should be equal to` PokemonRepositoryController.UNREGISTERED_SKILL_ERROR
     }
 
     @Test
@@ -100,7 +100,7 @@ class PokemonRepositoryTests {
             pokemonDB.insertData(it.hashCode().toString(), it)
         }
 
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result: MutableMap<String, PokemonDTO> = pokemonRepository.getPokemons()
 
         var index = 0
@@ -124,7 +124,7 @@ class PokemonRepositoryTests {
 
         pokemonDB.insertData(id, pokemonData)
 
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result: PokemonDTO? = pokemonRepository.getPokemonById(id)
 
         result?.apply {
@@ -142,7 +142,7 @@ class PokemonRepositoryTests {
         val pokemonData = PokemonDTO(name="Squirtle", type= listOf(1), description="A lightning rat", skills=listOf(1))
         val id = pokemonData.hashCode().toString()
 
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result: PokemonDTO? = pokemonRepository.getPokemonById(id)
 
         result.`should be null`()
@@ -158,10 +158,10 @@ class PokemonRepositoryTests {
 
         pokemonDB.insertData(id, oldPokemonData)
 
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result: Int = pokemonRepository.updatePokemonById(id, newPokemonData)
 
-        result `should be equal to` PokemonRepository.OK
+        result `should be equal to` PokemonRepositoryController.OK
         pokemonDB.getData()[id]?.apply {
             name `should be equal to` newPokemonData.name
             type `should contain same` newPokemonData.type
@@ -180,10 +180,10 @@ class PokemonRepositoryTests {
 
         pokemonDB.insertData(id, oldPokemonData)
 
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result: Int = pokemonRepository.updatePokemonById(id, newPokemonData)
 
-        result `should be equal to` PokemonRepository.TYPE_AND_SKILL_MISMATCH
+        result `should be equal to` PokemonRepositoryController.TYPE_AND_SKILL_MISMATCH
         pokemonDB.getData()[id]?.apply {
             name `should be equal to` oldPokemonData.name
             type `should contain same` oldPokemonData.type
@@ -202,10 +202,10 @@ class PokemonRepositoryTests {
 
         pokemonDB.insertData(id, oldPokemonData)
 
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result: Int = pokemonRepository.updatePokemonById(id, newPokemonData)
 
-        result `should be equal to` PokemonRepository.UNREGISTERED_SKILL_ERROR
+        result `should be equal to` PokemonRepositoryController.UNREGISTERED_SKILL_ERROR
         pokemonDB.getData()[id]?.apply {
             name `should be equal to` oldPokemonData.name
             type `should contain same` oldPokemonData.type
@@ -225,10 +225,10 @@ class PokemonRepositoryTests {
 
         pokemonDB.insertData(id, oldPokemonData)
 
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result: Int = pokemonRepository.updatePokemonById(unknownId, newPokemonData)
 
-        result `should be equal to` PokemonRepository.UNREGISTERED_POKEMON_ERROR
+        result `should be equal to` PokemonRepositoryController.UNREGISTERED_POKEMON_ERROR
         pokemonDB.getData()[id]?.apply {
             name `should be equal to` oldPokemonData.name
             type `should contain same` oldPokemonData.type
@@ -248,11 +248,11 @@ class PokemonRepositoryTests {
         pokemonDB.insertData(id, pokemonData)
 
         // Act
-        val pokemonRepository = PokemonRepository(pokemonDB, skillDB)
+        val pokemonRepository = PokemonRepositoryController(pokemonDB, skillDB)
         val result = pokemonRepository.deletePokemonById(id)
 
         // Assert
-        result `should be equal to` PokemonRepository.OK
+        result `should be equal to` PokemonRepositoryController.OK
         pokemonDB.getData().size `should be equal to` 0
     }
 }

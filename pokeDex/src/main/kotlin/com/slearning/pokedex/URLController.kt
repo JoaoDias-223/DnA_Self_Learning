@@ -1,25 +1,24 @@
 package com.slearning.pokedex
 
-import com.slearning.pokedex.controller.PokemonRepository
+import com.slearning.pokedex.controller.PokemonRepositoryController
 import com.slearning.pokedex.model.dtos.PokemonDTO
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-import org.springframework.boot.runApplication
+//import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.http.HttpStatus.*
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletResponse
 import com.slearning.pokedex.controller.Serializer.toJson
 
-@SpringBootApplication (exclude = [DataSourceAutoConfiguration::class])
+@SpringBootApplication
 @RestController
-class URLController (private val pokemonController: PokemonRepository){
+class URLController (private val pokemonControllerController: PokemonRepositoryController){
 
 	@GetMapping("/list_of_pokemon")
 	fun getAllPokemons(response: HttpServletResponse) : String {
 		response.status = OK.value()
 		response.contentType = "application/json"
 
-		return pokemonController.getPokemons().toJson()
+		return pokemonControllerController.getPokemons().toJson()
 	}
 
 	/* Trocar o header Description por uma mensagem no body*/
@@ -27,18 +26,18 @@ class URLController (private val pokemonController: PokemonRepository){
 	fun createPokemon(@RequestBody body: PokemonDTO, response: HttpServletResponse) : String {
 		response.contentType = "application/json"
 
-		return when (pokemonController.createPokemon(body)) {
-			PokemonRepository.DUPLICATE_POKEMON_ERROR -> {
+		return when (pokemonControllerController.createPokemon(body)) {
+			PokemonRepositoryController.DUPLICATE_POKEMON_ERROR -> {
 				response.status = BAD_REQUEST.value()
 				"Pokemon's already registered"
 			}
 
-			PokemonRepository.UNREGISTERED_SKILL_ERROR -> {
+			PokemonRepositoryController.UNREGISTERED_SKILL_ERROR -> {
 				response.status = BAD_REQUEST.value()
 				"Pokemon's skill not registered"
 			}
 
-			PokemonRepository.TYPE_AND_SKILL_MISMATCH -> {
+			PokemonRepositoryController.TYPE_AND_SKILL_MISMATCH -> {
 				response.status = BAD_REQUEST.value()
 				"Pokemon's types and skills mismatching"
 			}
@@ -53,7 +52,7 @@ class URLController (private val pokemonController: PokemonRepository){
 	@GetMapping("/list_of_pokemon/{pokemonID}")
 	fun getPokemon(@PathVariable pokemonID: String, response: HttpServletResponse) : String {
 		response.contentType = "application/json"
-		return when(val pokemon =  pokemonController.getPokemonById(pokemonID)) {
+		return when(val pokemon =  pokemonControllerController.getPokemonById(pokemonID)) {
 			null -> {
 				response.status = NOT_FOUND.value()
 				"{}"
@@ -74,8 +73,4 @@ class URLController (private val pokemonController: PokemonRepository){
 	fun updatePokemon(id: Int) : String {
 		TODO("Not yet implemented")
 	}
-}
-
-fun main(args: Array<String>) {
-	runApplication<URLController>(*args) // *: spread operator (same as ... in JS)
 }

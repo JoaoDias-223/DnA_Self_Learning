@@ -7,8 +7,8 @@ import com.slearning.pokedex.model.dtos.SkillDTO
 import org.springframework.stereotype.Component
 
 @Component
-class PokemonRepository(private val pokemonDatabase: PokemonDatabase,
-                        private val skillDatabase: SkillDatabase
+class PokemonRepositoryController(private val pokemonDatabase: PokemonDatabase,
+                                  private val skillDatabase: SkillDatabase
 ) {
 
     companion object {
