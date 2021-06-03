@@ -32,6 +32,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.springframework.cloud:spring-cloud-starter-openfeign:2.2.7.RELEASE")
 	implementation("org.json:json:20210307")
+	implementation("org.postgresql:postgresql:42.2.20")
+	implementation("org.flywaydb:flyway-maven-plugin:7.8.2")
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
 	testImplementation("io.mockk:mockk:1.10.6")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")

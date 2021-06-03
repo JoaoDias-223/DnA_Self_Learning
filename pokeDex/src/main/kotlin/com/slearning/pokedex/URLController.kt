@@ -1,58 +1,59 @@
 package com.slearning.pokedex
 
 import com.slearning.pokedex.controller.PokemonRepositoryController
+import com.slearning.pokedex.controller.Serializer.toJson
 import com.slearning.pokedex.model.dtos.PokemonDTO
 import org.springframework.boot.autoconfigure.SpringBootApplication
 //import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.http.HttpStatus.*
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletResponse
-import com.slearning.pokedex.controller.Serializer.toJson
 
 @SpringBootApplication
 @RestController
-class URLController (private val pokemonControllerController: PokemonRepositoryController){
+class URLController (private val pokemonRepositoryController: PokemonRepositoryController){
 
 	@GetMapping("/list_of_pokemon")
 	fun getAllPokemons(response: HttpServletResponse) : String {
 		response.status = OK.value()
 		response.contentType = "application/json"
 
-		return pokemonControllerController.getPokemons().toJson()
+		return pokemonRepositoryController.getPokemons().toJson()
 	}
 
 	/* Trocar o header Description por uma mensagem no body*/
 	@PostMapping("/pokemon")
 	fun createPokemon(@RequestBody body: PokemonDTO, response: HttpServletResponse) : String {
-		response.contentType = "application/json"
-
-		return when (pokemonControllerController.createPokemon(body)) {
-			PokemonRepositoryController.DUPLICATE_POKEMON_ERROR -> {
-				response.status = BAD_REQUEST.value()
-				"Pokemon's already registered"
-			}
-
-			PokemonRepositoryController.UNREGISTERED_SKILL_ERROR -> {
-				response.status = BAD_REQUEST.value()
-				"Pokemon's skill not registered"
-			}
-
-			PokemonRepositoryController.TYPE_AND_SKILL_MISMATCH -> {
-				response.status = BAD_REQUEST.value()
-				"Pokemon's types and skills mismatching"
-			}
-
-			else -> {
-				response.status = OK.value()
-				"Everything's fine"
-			}
-		}
+//		response.contentType = "application/json"
+//
+//		return when (pokemonRepositoryController.createPokemon(body)) {
+//			PokemonRepositoryController.DUPLICATE_POKEMON_ERROR -> {
+//				response.status = BAD_REQUEST.value()
+//				"Pokemon's already registered"
+//			}
+//
+//			PokemonRepositoryController.UNREGISTERED_SKILL_ERROR -> {
+//				response.status = BAD_REQUEST.value()
+//				"Pokemon's skill not registered"
+//			}
+//
+//			PokemonRepositoryController.TYPE_AND_SKILL_MISMATCH -> {
+//				response.status = BAD_REQUEST.value()
+//				"Pokemon's types and skills mismatching"
+//			}
+//
+//			else -> {
+//				response.status = OK.value()
+//				"Everything's fine"
+//			}
+//		}
+		return "OK"
 	}
 
 	@GetMapping("/list_of_pokemon/{pokemonID}")
-	fun getPokemon(@PathVariable pokemonID: String, response: HttpServletResponse) : String {
+	fun getPokemon(@PathVariable pokemonID: Long, response: HttpServletResponse) : String {
 		response.contentType = "application/json"
-		return when(val pokemon =  pokemonControllerController.getPokemonById(pokemonID)) {
+		return when(val pokemon =  pokemonRepositoryController.getPokemonById(pokemonID)) {
 			null -> {
 				response.status = NOT_FOUND.value()
 				"{}"

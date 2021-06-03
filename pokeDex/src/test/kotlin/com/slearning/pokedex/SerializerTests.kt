@@ -26,7 +26,7 @@ class SerializerTests {
 
         result["833325606"]?.apply {
             name `should be equal to` "Pikachu"
-            type.contains(1).`should be true`()
+            types.contains(1).`should be true`()
             description `should be equal to` "A really big lightning rat"
             skills.contains(1).`should be true`()
         }

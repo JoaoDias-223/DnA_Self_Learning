@@ -5,15 +5,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PokemonDTO(
     val name: String,
-    val type: List<Int>,
+    val types: ArrayList<Int>,
     val description: String,
-    val skills: List<Int>
+    val skills: ArrayList<Long>
 ) {
 
     override fun toString(): String {
 
         return """
-            {"name":"$name","type":${type.map { "$it" }},"description":"$description","skills":${skills.map { "$it" }}}
+            {"name":"$name","type":${types.map { "$it" }},"description":"$description","skills":${skills.map { "$it" }}}
         """.trimIndent()
     }
 }

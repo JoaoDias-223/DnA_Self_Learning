@@ -1,14 +1,16 @@
 package com.slearning.pokedex.controller
 
-import com.slearning.pokedex.databases.PokemonDatabase
-import com.slearning.pokedex.databases.SkillDatabase
+import com.slearning.pokedex.model.PokemonEntity
 import com.slearning.pokedex.model.dtos.PokemonDTO
-import com.slearning.pokedex.model.dtos.SkillDTO
+import com.slearning.pokedex.repositories.PokemonRepository
+import com.slearning.pokedex.repositories.SkillRepository
+import org.springframework.data.domain.Example
+import org.springframework.data.domain.ExampleMatcher.*
 import org.springframework.stereotype.Component
 
 @Component
-class PokemonRepositoryController(private val pokemonDatabase: PokemonDatabase,
-                                  private val skillDatabase: SkillDatabase
+class PokemonRepositoryController(private val pokemonRepository: PokemonRepository,
+                                  private val skillRepository: SkillRepository
 ) {
 
     companion object {
@@ -20,76 +22,126 @@ class PokemonRepositoryController(private val pokemonDatabase: PokemonDatabase,
     }
 
     fun createPokemon(pokemonData: PokemonDTO): Int {
-        val pokemons: MutableMap<String, PokemonDTO> = pokemonDatabase.getData()
-        val skills: MutableMap<String, SkillDTO> = skillDatabase.getData()
+//        val pokemon = Pokemon()
+//        pokemon.name = pokemonData.name
+//        pokemon.types = ArrayList()
+//        pokemon.types.addAll(pokemonData.types)
+//        pokemon.description = pokemonData.description
+//        pokemon.skills = ArrayList()
+//        pokemon.skills.addAll(pokemonData.skills)
 
-        return when {
-            isPokemonAlreadyRegistered(pokemonData, pokemons) -> DUPLICATE_POKEMON_ERROR
-            arePokemonSkillsUnregisteredInDB(pokemonData, skills) -> UNREGISTERED_SKILL_ERROR
-            arePokemonTypeAndSkillsNotMatching(pokemonData) -> TYPE_AND_SKILL_MISMATCH
-            else -> {
-                pokemonDatabase.insertData(pokemonData.hashCode().toString(), pokemonData)
-                OK
-            }
-        }
+//        return when {
+//            isPokemonAlreadyRegistered(pokemon) -> DUPLICATE_POKEMON_ERROR
+//            arePokemonSkillsUnregisteredInDB(pokemon) -> UNREGISTERED_SKILL_ERROR
+//            arePokemonTypeAndSkillsNotMatching(pokemon) -> TYPE_AND_SKILL_MISMATCH
+//            else -> {
+//                pokemonRepository.save(pokemon)
+//                OK
+//            }
+//        }
+        return 0
     }
 
     fun getPokemons(): MutableMap<String, PokemonDTO> {
-        return pokemonDatabase.getData()
+//        val listOfPokemons: MutableList<Pokemon> = pokemonRepository.findAll()
+//
+//        val mapOfPokemons: MutableMap<String, PokemonDTO> = mutableMapOf()
+//
+//        listOfPokemons.forEach {
+//            mapOfPokemons[it.id.toString()] = PokemonDTO(it.name, it.types, it.description, it.skills)
+//        }
+//
+//        return mapOfPokemons
+        return mutableMapOf<String, PokemonDTO>()
     }
 
-    fun getPokemonById(id: String): PokemonDTO? {
-        return pokemonDatabase.getData()[id]
+    fun getPokemonById(id: Long): PokemonEntity? {
+        return pokemonRepository.findById(id).orElseGet{ null }
     }
 
-    fun updatePokemonById(id: String, newPokemonData: PokemonDTO): Int {
-        val pokemons: MutableMap<String, PokemonDTO> = pokemonDatabase.getData()
-        val skills: MutableMap<String, SkillDTO> = skillDatabase.getData()
+    fun updatePokemonById(id: Long, newPokemonData: PokemonDTO): Int {
+//        val pokemon = Pokemon()
+//        pokemon.name = newPokemonData.name
+//        pokemon.types = newPokemonData.types
+//        pokemon.description = newPokemonData.description
+//        pokemon.skills = newPokemonData.skills
+//        pokemon.id = id
+//
+//        return when {
+//            !pokemonRepository.existsById(id) -> UNREGISTERED_POKEMON_ERROR
+//            isPokemonAlreadyRegistered(pokemon) -> DUPLICATE_POKEMON_ERROR
+//            arePokemonSkillsUnregisteredInDB(pokemon) -> UNREGISTERED_SKILL_ERROR
+//            arePokemonTypeAndSkillsNotMatching(pokemon) -> TYPE_AND_SKILL_MISMATCH
+//            else -> {
+//                pokemonRepository.saveAndFlush(pokemon)
+//                OK
+//            }
+//        }
+        return 0
+    }
 
+    fun deletePokemonById(id: Long): Int {
         return when {
-            !pokemonDatabase.hasId(id) -> UNREGISTERED_POKEMON_ERROR
-            isPokemonAlreadyRegistered(newPokemonData, pokemons) -> DUPLICATE_POKEMON_ERROR
-            arePokemonSkillsUnregisteredInDB(newPokemonData, skills) -> UNREGISTERED_SKILL_ERROR
-            arePokemonTypeAndSkillsNotMatching(newPokemonData) -> TYPE_AND_SKILL_MISMATCH
+            !pokemonRepository.existsById(id) -> UNREGISTERED_POKEMON_ERROR
             else -> {
-                pokemonDatabase.insertData(id, newPokemonData)
+                pokemonRepository.deleteById(id)
                 OK
             }
         }
     }
 
-    fun deletePokemonById(id: String): Int {
-        return when {
-            !pokemonDatabase.hasId(id) -> UNREGISTERED_POKEMON_ERROR
-            else -> {
-                pokemonDatabase.deleteById(id)
-                OK
-            }
-        }
-    }
+    fun isPokemonAlreadyRegistered(pokemonEntity: PokemonEntity): Boolean {
+        val pokemonMatcher = matchingAny()
+            .withIgnorePaths("pokemon_id")
+            .withMatcher("pokemon_name", GenericPropertyMatchers.exact())
+            .withMatcher("pokemon_types", GenericPropertyMatchers.contains())
+            .withMatcher("pokemon_description", GenericPropertyMatchers.exact())
+            .withMatcher("pokemon_skills", GenericPropertyMatchers.contains())
 
-    fun isPokemonAlreadyRegistered(pokemon: PokemonDTO, pokemons: MutableMap<String, PokemonDTO>): Boolean {
-        return pokemons.containsKey("${pokemon.hashCode()}")
-    }
-
-    fun arePokemonSkillsUnregisteredInDB(pokemon: PokemonDTO, skills: MutableMap<String, SkillDTO>): Boolean {
-        var counter = 0
-        pokemon.skills.forEach { pokemonSkillID ->
-            skills.forEach { (databaseSkillID, _) ->
-                counter += if("$pokemonSkillID" == databaseSkillID){ 1 } else { 0 }
-            }
-        }
-        return counter != pokemon.skills.size
-    }
-
-    fun arePokemonTypeAndSkillsNotMatching(pokemon: PokemonDTO): Boolean {
-        var counter = 0
-        pokemon.type.forEach { type ->
-            pokemon.skills.forEach { skill ->
-                counter += if(type == skill){ 1 } else { 0 }
-            }
+        var isPokemonRegistered = true
+        try {
+            val example = Example.of(pokemonEntity, pokemonMatcher)
+            isPokemonRegistered = pokemonRepository.exists(example)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
-        return counter != pokemon.type.size
+        return isPokemonRegistered
+    }
+
+    fun arePokemonSkillsUnregisteredInDB(pokemonEntity: PokemonEntity): Boolean {
+//        val counter = 0
+//        pokemon.skills.forEach { pokemonSkillID ->
+//            var isSkillRegistered = false;
+//
+//            try {
+//                isSkillRegistered = skillRepository.existsById(pokemonSkillID)
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//
+//            if (isSkillRegistered) {
+//                return false
+//            }
+//        }
+        return false
+    }
+
+    fun arePokemonTypeAndSkillsNotMatching(pokemonEntity: PokemonEntity): Boolean {
+//        println("${this.javaClass.name}::arePokemonTypeAndSkillsNotMatching() called")
+//
+//        var counter = 0
+//        pokemon.types.forEach { type ->
+//            println("\tpokemon type: $type")
+//            pokemon.skills.forEach { skillID ->
+//                println("\tpokemon skill ID: $skillID")
+//                val optional = skillRepository.findById(skillID)
+//                if (optional.isPresent) {
+//                    counter += if(type == optional.get().type) { 1 } else { 0 }
+//                }
+//            }
+//        }
+
+        return false
     }
 }
