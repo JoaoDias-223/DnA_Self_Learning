@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    web: DEBUG
+
+spring:
+  profiles:
+    active: local
+  jpa:
+    properties:
+      hibernate:
+        dialect: "org.hibernate.dialect.PostgreSQL9Dialect"
+        format_sql: true
+    show-sql: true
+
+  batch:
+    initialize-schema: always
+
+  datasource:
+    url: "jdbc:postgresql://0.0.0.0:5432/pokedex"
+    driver-class-name: "org.postgresql.Driver"
+    username: root
+    password: root
+
+flyway:
+  enabled: false
