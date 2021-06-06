@@ -1,6 +1,5 @@
 package com.slearning.pokedex
 
-import com.slearning.pokedex.model.dtos.PokemonDTO
 import org.amshove.kluent.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

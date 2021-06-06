@@ -1,9 +1,6 @@
 package com.slearning.pokedex
 
 import com.slearning.pokedex.controller.PokemonRepositoryController
-import com.slearning.pokedex.databases.PokemonDatabase
-import com.slearning.pokedex.databases.SkillDatabase
-import com.slearning.pokedex.model.dtos.PokemonDTO
 import io.mockk.*
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be null`
