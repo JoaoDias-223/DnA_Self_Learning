@@ -1,5 +1,6 @@
 package com.slearning.pokedex.model
 
+import java.io.Serializable
 import javax.persistence.Column
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
@@ -8,7 +9,7 @@ import javax.persistence.*
 
 @Entity(name = "skills")
 @Table(name = "skills", schema = "pokedex")
-class SkillEntity(
+class Skill(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "skill_sequence")
     @SequenceGenerator(name="skill_sequence", sequenceName = "SKL")
@@ -24,10 +25,10 @@ class SkillEntity(
     @ManyToMany
     @JoinTable(
         name = "skill_has_type",
-        joinColumns = [JoinColumn(name = "skill_id")],
-        inverseJoinColumns = [JoinColumn(name = "type_id")]
+        joinColumns = [JoinColumn(name = "skill_id", referencedColumnName = "id")],
+        inverseJoinColumns = [JoinColumn(name = "type_id", referencedColumnName = "id")]
     )
-    var types: Set<TypeEntity> = setOf(),
+    var types: Set<Type> = setOf(),
 
     @Column (name = "action", nullable = false)
     var action: String? = null,
@@ -35,9 +36,4 @@ class SkillEntity(
     @Column(name = "action_points", nullable = false)
     var actionPoints: Int = 0,
 
-    @ManyToMany(
-        mappedBy = "skills",
-        cascade = [CascadeType.ALL]
-    )
-    var pokemons: Set<PokemonEntity> = setOf()
-)
+): Serializable

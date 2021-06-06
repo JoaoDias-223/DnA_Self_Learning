@@ -1,8 +1,8 @@
 package com.slearning.pokedex.repositories
 
+import com.slearning.pokedex.model.Type
 import org.springframework.data.jpa.repository.JpaRepository
-import com.slearning.pokedex.model.Skill
 import org.springframework.stereotype.Repository
 
 @Repository
-interface SkillRepository: JpaRepository<Skill, String>
+interface TypeRepository : JpaRepository<Type, String>

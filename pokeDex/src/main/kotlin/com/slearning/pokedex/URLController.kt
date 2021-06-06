@@ -2,55 +2,33 @@ package com.slearning.pokedex
 
 import com.slearning.pokedex.controller.PokemonRepositoryController
 import com.slearning.pokedex.controller.Serializer.toJson
-import com.slearning.pokedex.model.dtos.PokemonDTO
+import com.slearning.pokedex.model.Pokemon
 import org.springframework.boot.autoconfigure.SpringBootApplication
-//import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-import org.springframework.http.HttpStatus.*
+import org.springframework.http.HttpStatus.OK
+import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletResponse
 
 @SpringBootApplication
 @RestController
+@RequestMapping("/pokemon")
 class URLController (private val pokemonRepositoryController: PokemonRepositoryController){
 
-	@GetMapping("/list_of_pokemon")
+	@GetMapping(value = ["/"], produces = [MediaType.APPLICATION_JSON_VALUE])
 	fun getAllPokemons(response: HttpServletResponse) : String {
 		response.status = OK.value()
-		response.contentType = "application/json"
 
 		return pokemonRepositoryController.getPokemons().toJson()
 	}
 
-	/* Trocar o header Description por uma mensagem no body*/
-	@PostMapping("/pokemon")
-	fun createPokemon(@RequestBody body: PokemonDTO, response: HttpServletResponse) : String {
-//		response.contentType = "application/json"
-//
-//		return when (pokemonRepositoryController.createPokemon(body)) {
-//			PokemonRepositoryController.DUPLICATE_POKEMON_ERROR -> {
-//				response.status = BAD_REQUEST.value()
-//				"Pokemon's already registered"
-//			}
-//
-//			PokemonRepositoryController.UNREGISTERED_SKILL_ERROR -> {
-//				response.status = BAD_REQUEST.value()
-//				"Pokemon's skill not registered"
-//			}
-//
-//			PokemonRepositoryController.TYPE_AND_SKILL_MISMATCH -> {
-//				response.status = BAD_REQUEST.value()
-//				"Pokemon's types and skills mismatching"
-//			}
-//
-//			else -> {
-//				response.status = OK.value()
-//				"Everything's fine"
-//			}
-//		}
-		return "OK"
+	@PostMapping("/")
+	fun createPokemon(@RequestBody body: Pokemon, response: HttpServletResponse) : String {
+		response.status = OK.value()
+		return "Ok"
 	}
 
-	@GetMapping("/list_of_pokemon/{pokemonID}")
+	@GetMapping("/{pokemonID}")
 	fun getPokemon(@PathVariable pokemonID: Long, response: HttpServletResponse) : String {
 		response.contentType = "application/json"
 		return when(val pokemon =  pokemonRepositoryController.getPokemonById(pokemonID)) {
@@ -65,12 +43,12 @@ class URLController (private val pokemonRepositoryController: PokemonRepositoryC
 		}
 	}
 
-	@DeleteMapping("/list_of_pokemon/{pokemonID}")
+	@DeleteMapping("/{pokemonID}")
 	fun deletePokemon(id: Int) : String {
 		TODO("Not yet implemented")
 	}
 
-	@PutMapping("/list_of_pokemon/update")
+	@PutMapping("/{pokemonID}")
 	fun updatePokemon(id: Int) : String {
 		TODO("Not yet implemented")
 	}
