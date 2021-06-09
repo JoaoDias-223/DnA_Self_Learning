@@ -3,6 +3,8 @@ package com.slearning.pokedex
 import com.slearning.pokedex.controller.Serializer.fromJsonToList
 import com.slearning.pokedex.controller.Serializer.toJson
 import com.slearning.pokedex.model.Pokemon
+import com.slearning.pokedex.model.Skill
+import com.slearning.pokedex.model.Type
 import com.slearning.pokedex.resources.EntityFactory
 import com.slearning.pokedex.resources.JsonFactory
 import org.amshove.kluent.`should be equal to`
@@ -58,4 +60,33 @@ class SerializerTests {
         result `should be equal to` expectedJson
     }
 
+    @Test
+    fun `serializes Pokemon to Json`() {
+        val expectedJson = JsonFactory.createPokemon()
+
+        val pokemon = EntityFactory.createPokemon()
+        val result = pokemon.toJson<Pokemon>()
+
+        result `should be equal to` expectedJson
+    }
+
+    @Test
+    fun `serializes Skill to Json`() {
+        val expectedJson = JsonFactory.createSkill()
+
+        val skill = EntityFactory.createSkill()
+        val result = skill.toJson<Skill>()
+
+        result `should be equal to` expectedJson
+    }
+
+    @Test
+    fun `serializes Type to Json`() {
+        val expectedJson = JsonFactory.createType()
+
+        val skill = EntityFactory.createType()
+        val result = skill.toJson<Type>()
+
+        result `should be equal to` expectedJson
+    }
 }

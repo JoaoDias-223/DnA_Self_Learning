@@ -10,8 +10,8 @@ class EntityFactory {
             id: String = "POKEMON_ID",
             name: String = "POKEMON_NAME",
             description: String = "POKEMON_DESCRIPTION",
-            types: Set<Type> = setOf(createType(id="POKEMON_TYPE_ID", name="POKEMON_TYPE_NAME")),
-            skills: Set<Skill> = setOf(createSkill())
+            types: MutableSet<Type> = mutableSetOf(createType(id="POKEMON_TYPE_ID", name="POKEMON_TYPE_NAME")),
+            skills: MutableSet<Skill> = mutableSetOf(createSkill())
         ): Pokemon {
             return Pokemon(id, name, description, types, skills)
         }
@@ -27,7 +27,7 @@ class EntityFactory {
             id: String = "SKILL_ID",
             name: String = "SKILL_NAME",
             description: String = "SKILL_DESCRIPTION",
-            types: Set<Type> = setOf(createType(id="SKILL_TYPE_ID", name="SKILL_TYPE_NAME")),
+            types: MutableSet<Type> = mutableSetOf(createType(id="SKILL_TYPE_ID", name="SKILL_TYPE_NAME")),
             action: String = "SKILL_ACTION",
             actionPoints: Int = 999999
         ): Skill {

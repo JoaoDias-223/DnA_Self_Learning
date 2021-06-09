@@ -2,6 +2,9 @@ package com.slearning.pokedex.controller
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.slearning.pokedex.model.Pokemon
+import com.slearning.pokedex.model.Skill
+import com.slearning.pokedex.model.Type
 
 object Serializer{
     inline fun <reified T> String.fromJsonToList(): List<T> {
@@ -20,7 +23,17 @@ object Serializer{
         return mapper.writeValueAsString(this)
     }
 
-    inline fun <reified T> Set<T>.toJson(): String {
+    inline fun <reified T> Pokemon.toJson(): String {
+        val mapper = jacksonObjectMapper()
+        return mapper.writeValueAsString(this)
+    }
+
+    inline fun <reified T> Skill.toJson(): String {
+        val mapper = jacksonObjectMapper()
+        return mapper.writeValueAsString(this)
+    }
+
+    inline fun <reified T> Type.toJson(): String {
         val mapper = jacksonObjectMapper()
         return mapper.writeValueAsString(this)
     }
