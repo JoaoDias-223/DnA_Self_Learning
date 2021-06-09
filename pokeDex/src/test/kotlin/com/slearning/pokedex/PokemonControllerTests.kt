@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class URLControllerTests {
+class PokemonControllerTests {
 
 //    @Autowired
 //    lateinit var mockMVC: MockMvc

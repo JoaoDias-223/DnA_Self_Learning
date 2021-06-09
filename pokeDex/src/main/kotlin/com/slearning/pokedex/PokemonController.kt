@@ -2,10 +2,10 @@ package com.slearning.pokedex
 
 import com.slearning.pokedex.controller.PokemonRepositoryController
 import com.slearning.pokedex.controller.Serializer.toJson
+import com.slearning.pokedex.controller.resources.PokemonRepositoryControllerCodes
 import com.slearning.pokedex.model.Pokemon
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.http.HttpStatus.OK
-import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletResponse
@@ -13,43 +13,96 @@ import javax.servlet.http.HttpServletResponse
 @SpringBootApplication
 @RestController
 @RequestMapping("/pokemon")
-class URLController (private val pokemonRepositoryController: PokemonRepositoryController){
+class PokemonController (private val pokemonRepositoryController: PokemonRepositoryController){
 
 	@GetMapping(value = ["/"], produces = [MediaType.APPLICATION_JSON_VALUE])
 	fun getAllPokemons(response: HttpServletResponse) : String {
-		response.status = OK.value()
+		response.status = HttpStatus.OK.value()
 
 		return pokemonRepositoryController.getPokemons().toJson()
 	}
 
-	@PostMapping("/")
-	fun createPokemon(@RequestBody body: Pokemon, response: HttpServletResponse) : String {
-		response.status = OK.value()
-		return "Ok"
-	}
-
-	@GetMapping("/{pokemonID}")
-	fun getPokemon(@PathVariable pokemonID: Long, response: HttpServletResponse) : String {
-		response.contentType = "application/json"
-		return when(val pokemon =  pokemonRepositoryController.getPokemonById(pokemonID)) {
+	@GetMapping(value = ["/{pokemonID}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+	fun getPokemon(@PathVariable id: String, response: HttpServletResponse) : String {
+		return when(val pokemon =  pokemonRepositoryController.getPokemonById(id)) {
 			null -> {
-				response.status = NOT_FOUND.value()
+				response.status = HttpStatus.NOT_FOUND.value()
 				"{}"
 			}
 			else -> {
-				response.status = OK.value()
-				pokemon.toString()
+				response.status = HttpStatus.OK.value()
+				pokemon.toJson<Pokemon>()
+			}
+		}
+	}
+
+	@PostMapping("/")
+	fun createPokemon(@RequestBody body: Pokemon, response: HttpServletResponse) : String {
+		return when(val result: PokemonRepositoryControllerCodes = pokemonRepositoryController.createPokemon(body)) {
+			PokemonRepositoryControllerCodes.DUPLICATE_POKEMON_ERROR,
+			PokemonRepositoryControllerCodes.UNREGISTERED_SKILL_ERROR,
+			PokemonRepositoryControllerCodes.TYPE_AND_SKILL_MISMATCH ->
+			{
+				response.status = HttpStatus.BAD_REQUEST.value()
+				result.name
+			}
+
+			PokemonRepositoryControllerCodes.OK -> {
+				response.status = HttpStatus.OK.value()
+				body.toJson<Pokemon>()
+			}
+
+			else -> {
+				response.status = HttpStatus.BAD_REQUEST.value()
+				PokemonRepositoryControllerCodes.UNKNOWN_ERROR.name
+			}
+		}
+	}
+
+	@PutMapping("/{pokemonID}")
+	fun updatePokemon(
+		@PathVariable id: String,
+		@RequestBody body: Pokemon,
+		response: HttpServletResponse
+	) : String {
+		return when(val result: PokemonRepositoryControllerCodes = pokemonRepositoryController.updatePokemonById(
+			id, body
+		)) {
+			PokemonRepositoryControllerCodes.DUPLICATE_POKEMON_ERROR,
+			PokemonRepositoryControllerCodes.UNREGISTERED_SKILL_ERROR,
+			PokemonRepositoryControllerCodes.TYPE_AND_SKILL_MISMATCH ->
+			{
+				response.status = HttpStatus.BAD_REQUEST.value()
+				result.name
+			}
+
+			PokemonRepositoryControllerCodes.OK -> {
+				response.status = HttpStatus.OK.value()
+				body.toJson<Pokemon>()
+			}
+
+			else -> {
+				response.status = HttpStatus.BAD_REQUEST.value()
+				PokemonRepositoryControllerCodes.UNKNOWN_ERROR.name
 			}
 		}
 	}
 
 	@DeleteMapping("/{pokemonID}")
-	fun deletePokemon(id: Int) : String {
-		TODO("Not yet implemented")
-	}
-
-	@PutMapping("/{pokemonID}")
-	fun updatePokemon(id: Int) : String {
-		TODO("Not yet implemented")
+	fun deletePokemon(@PathVariable id: String, response: HttpServletResponse) : String {
+		return when(val result: PokemonRepositoryControllerCodes = pokemonRepositoryController.deletePokemonById(id)) {
+			PokemonRepositoryControllerCodes.UNREGISTERED_POKEMON_ERROR -> {
+				response.status = HttpStatus.BAD_REQUEST.value()
+				result.name
+			}
+			PokemonRepositoryControllerCodes.OK -> {
+				response.status = HttpStatus.OK.value()
+				result.name
+			}
+			else -> {
+				response.status = HttpStatus.BAD_REQUEST.value()
+				PokemonRepositoryControllerCodes.UNKNOWN_ERROR.name
+			}
+		}
 	}
 }

@@ -1,6 +1,5 @@
 package com.slearning.pokedex
 
-import org.flywaydb.core.Flyway
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
@@ -13,7 +12,7 @@ class Main {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            runApplication<URLController>(){
+            runApplication<PokemonController>(){
                 if (args.isNotEmpty() && args[0] == "migrate"){
                     this.setAdditionalProfiles("dbmigration")
                 }
