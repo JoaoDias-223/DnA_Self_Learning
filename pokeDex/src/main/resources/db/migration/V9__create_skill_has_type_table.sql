@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS pokedex.skill_has_type (
-    skill_id        VARCHAR(20)     NOT NULL,
-    type_id         VARCHAR(20)     NOT NULL,
+    skill_id        VARCHAR(40)     NOT NULL,
+    type_id         VARCHAR(40)     NOT NULL,
 
     CONSTRAINT fk_skill
         FOREIGN KEY (skill_id)
