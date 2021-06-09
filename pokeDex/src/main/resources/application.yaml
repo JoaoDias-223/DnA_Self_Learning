@@ -19,10 +19,14 @@ spring:
     initialize-schema: always
 
   datasource:
-    url: "jdbc:postgresql://0.0.0.0:5432/pokedex"
+    url: "jdbc:postgresql://0.0.0.0:5432/pokedex?currentSchema=pokedex"
     driver-class-name: "org.postgresql.Driver"
     username: root
     password: root
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
 
 flyway:
   enabled: false
+  baseline-on-migrate: true
