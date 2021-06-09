@@ -1,21 +1,20 @@
 package com.slearning.pokedex.model
 
 import java.io.Serializable
+import java.util.*
 import javax.persistence.*
 
 @Entity(name = "types")
 @Table(name = "types", schema = "pokedex")
 class Type(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "type_sequence")
-    @SequenceGenerator(name="type_sequence", sequenceName = "TYP")
     @Column(name = "id", updatable = false, nullable = false)
-    var id: String? = null,
+    var id: String? = UUID.randomUUID().toString(),
 
     @Column(name = "name", nullable = false)
     var name: String? = null,
 
-): Serializable
+    ): Serializable
 {
     override fun toString(): String {
         return """
