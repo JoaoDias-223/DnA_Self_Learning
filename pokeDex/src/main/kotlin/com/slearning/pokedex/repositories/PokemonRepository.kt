@@ -8,13 +8,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface PokemonRepository: JpaRepository<Pokemon, String>
 {
-//    @Query(
-//        value = "" +
-//            "SELECT p, t, s\n" +
-//            "FROM pokemons as p\n" +
-//            "JOIN p.types as t\n" +
-//            "JOIN p.skills as s\n" +
-//            ""
-//    )
-//    override fun findAll(): List<Pokemon>
+    fun existsByIdOrNameAndDescription(id: String, name: String, description: String): Boolean //happy accident
 }
